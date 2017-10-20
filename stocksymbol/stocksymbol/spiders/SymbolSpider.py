@@ -1,5 +1,6 @@
 import scrapy
 import csv
+from ..items import StockSymbolItem
 
 class SymbolSpider(scrapy.Spider):
     name = 'getsymbols'
@@ -29,6 +30,7 @@ class SymbolSpider(scrapy.Spider):
         page = response.text
         read = csv.reader(page)
         text_contents = []
+        SSI = StockSymbolItem
 
         for i in read:
             text_contents.append(i)
@@ -48,14 +50,11 @@ class SymbolSpider(scrapy.Spider):
 
         text_contents = text_contents[startpoint:]
         gap = int(len(text_contents)/company_count)
-        dict_output = {}
 
         for i in range(company_count):
             company = text_contents[i*gap+4][0].replace('\\u0026', '&').replace('\\u0027', "'").replace('\\u002F', '/').replace('\\u003B', ',').replace('\\u0022', '"')
             symbol = text_contents[i*gap+25][0]
-            dict_output[company] = [symbol, exchange]
-
-        yield dict_output
+            yield SSI(Company = company, Symbol = symbol, Exchange = exchange )
 
 
 

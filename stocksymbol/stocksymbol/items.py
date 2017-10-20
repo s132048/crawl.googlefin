@@ -4,9 +4,8 @@ from scrapy import Item, Field
 
 
 class StockSymbolItem(Item):
-    country = Field()
-    exchange = Field()
-    company = Field()
-    symbol = Field()
+    Exchange = Field()
+    Company = Field()
+    Symbol = Field()
     AWS_RDS_URI = Field()
 
