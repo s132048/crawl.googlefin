@@ -1,14 +1,26 @@
-구글 파이낸스 크롤러
+google finance crawler
 ==============================================
 
-개요
+overview
 ---------
-google finance 의 기능인 stock screener 와 get prices 를 사용해 주식 가격 데이터를 크롤링 합니다.
-크롤링 된 데이터는 AWS RDS 에 업로드 합니다.
+This package crawl financial data from google finance.
 
-테이블
+stocksymbol
+-------------
+Stocksymbol's spider crawls each stock's company name, stock symbol and exchange id.
+To get data, it uses `google stock screnner <https://finance.google.com/finance?#stockscreener>`_.
+Now it supports KOSPI, KOSDAQ, NYSE, NASDAQ, TYO, SHE and SHA.
+After getting data in JSON format, it parses to a list named test_contents.
+The list contains all the text data from the JSON format.
+Spider finds numbers of companies in each exchange.
+Then it interprets a construct of the list.
+It yields data to StockSymbolItem object.
+
+
+
+Table
 --------
-* symbol_exchange
+* symbols
 
 +----------+------------+
 |  column  |    type    |
