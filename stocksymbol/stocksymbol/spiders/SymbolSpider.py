@@ -3,7 +3,9 @@ import csv
 from ..items import StockSymbolItem
 
 class SymbolSpider(scrapy.Spider):
+
     name = 'getsymbols'
+
     def start_requests(self):
         urls = {
                 "KR": {
@@ -25,6 +27,7 @@ class SymbolSpider(scrapy.Spider):
         for country in urls:
             for url in urls[country].values():
                 yield scrapy.Request(url=url, callback=self.parse)
+
 
     def parse(self, response):
         page = response.text
@@ -51,8 +54,12 @@ class SymbolSpider(scrapy.Spider):
         text_contents = text_contents[startpoint:]
         gap = int(len(text_contents)/company_count)
 
+        def escape_html(text):
+            return text.replace('\\u0026', '&').replace('\\u0027', "'").replace('\\u002F', '/').replace('\\u003B',',').replace('\\u0022', '"')
+
         for i in range(company_count):
-            company = text_contents[i*gap+4][0].replace('\\u0026', '&').replace('\\u0027', "'").replace('\\u002F', '/').replace('\\u003B', ',').replace('\\u0022', '"')
+            company = text_contents[i*gap+4][0]
+            company = escape_html(company)
             symbol = text_contents[i*gap+25][0]
             yield SSI(Company = company, Symbol = symbol, Exchange = exchange )
 

@@ -3,10 +3,12 @@ google finance crawler
 
 overview
 ---------
+
 This package crawl financial data from google finance.
 
 stocksymbol
 -------------
+
 Stocksymbol's spider crawls each stock's company name, stock symbol and exchange id.
 To get data, it uses `google stock screnner <https://finance.google.com/finance?#stockscreener>`_.
 Now it supports KOSPI, KOSDAQ, NYSE, NASDAQ, TYO, SHE and SHA.
@@ -20,6 +22,7 @@ It yields data to StockSymbolItem object.
 
 Table
 --------
+
 * symbols
 
 +----------+------------+
