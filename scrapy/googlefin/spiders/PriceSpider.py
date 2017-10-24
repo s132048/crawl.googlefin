@@ -1,26 +1,25 @@
 import scrapy
 import csv
 import datetime
-from ..items import StockPriceItem, StockSymbolItem
-from dateutil.parser import parse
 import pandas as pd
-from scrapy.loader import ItemLoader
+from ..items import StockPriceItem
+from dateutil.parser import parse
 
 class PriceSpider(scrapy.Spider):
     name = 'getprices'
 
     def start_requests(self):
-        SymbolLoader = ItemLoader(item=StockSymbolItem())
-        Symbols = SymbolLoader.get_value('Code')
-        for i in Symbols[:10]:
-            yield scrapy.Request('https://finance.google.com/finance/getprices?q=%s&p=40Y&f=d,c,v,k,o,h,l' %i)
+
+        S = parse(self.startdate).date()
+        duration = datetime.datetime.now().date() - S
+        D = duration.days//365 + 1
+
+        yield scrapy.Request('https://finance.google.com/finance/getprices?q=005930&p=%sY&f=d,c,v,k,o,h,l' %D)
 
     def parse(self, response):
-        SPI = StockPriceItem()
         page = response.text
-
-        sdate = self.startdate
-        edate = self.enddate
+        S = parse(self.startdate).date()
+        E = parse(self.enddate).date()
 
 
         list_contents = []
@@ -36,32 +35,30 @@ class PriceSpider(scrapy.Spider):
         list_contents = list_contents[1:]
 
         for i in list_contents:
-
             if len(i[0]) > 4:
                 stamp = int(i[0][1:])
                 date = datetime.datetime.fromtimestamp(stamp).date()
                 i[0] = str(date)
                 series_contents[i[0]] = i[1:]
-
             else:
                 i[0] = str(date + datetime.timedelta(int(i[0])))
                 series_contents[i[0]] = i[1:]
 
-        for i in range(100):
-            datecheck = str(parse(sdate).date() + datetime.timedelta(i))
+        for i in range(300):
+            datecheck = str(S + datetime.timedelta(i))
             if datecheck in series_contents.keys():
-                sdate = datecheck
+                startdate = datecheck
                 break
 
-        for i in range(100):
-            datecheck = str(parse(edate).date() - datetime.timedelta(i))
+        for i in range(300):
+            datecheck = str(E - datetime.timedelta(i))
             if datecheck in series_contents.keys():
-                edate = datecheck
+                enddate = datecheck
                 break
 
-        output = series_contents[sdate:edate].to_dict()
-
-
-
-        yield output
+        for i in series_contents[startdate:enddate].keys():
+            yield StockPriceItem(Symbol='005930', Date=i, Open=series_contents[i][3], Close=series_contents[i][0],
+                                 High=series_contents[i][1], Low=series_contents[i][2], Volume=series_contents[i][4],
+                                 Cdays=series_contents[i][5]
+                                 )
 
