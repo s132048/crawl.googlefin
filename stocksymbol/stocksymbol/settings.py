@@ -14,7 +14,18 @@ BOT_NAME = 'stocksymbol'
 SPIDER_MODULES = ['stocksymbol.spiders']
 NEWSPIDER_MODULE = 'stocksymbol.spiders'
 
+DATABASE = {
+    'drivename': 'postgres',
+    'host': 'localhost',
+    'port': '5432',
+    'username': 'TA',
+    'password': '2048',
+    'database': 'symboldb'
+}
 
+ITEM_PIPELINES = {
+    'stocksymbol.pipelines.StockScreenerPipeline': 300
+}
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'stocksymbol (+http://www.yourdomain.com)'
 

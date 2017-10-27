@@ -40,7 +40,7 @@ class SymbolSpider(scrapy.Spider):
 
         company_count = 0
         startpoint = 0
-        exchange = 'exchange_id'
+        Exchange = 'exchange_id'
 
         for i in range(len(text_contents)):
             if text_contents[i] == ['num_company_results']:
@@ -48,7 +48,7 @@ class SymbolSpider(scrapy.Spider):
             elif text_contents[i] == ['title']:
                 startpoint = i
             elif text_contents[i] == ['exchange']:
-                exchange = text_contents[i+4][0]
+                Exchange = text_contents[i+4][0]
                 break
 
         text_contents = text_contents[startpoint:]
@@ -59,9 +59,9 @@ class SymbolSpider(scrapy.Spider):
 
         for i in range(company_count):
             company = text_contents[i*gap+4][0]
-            company = escape_html(company)
-            symbol = text_contents[i*gap+25][0]
-            yield SSI(Company = company, Symbol = symbol, Exchange = exchange )
+            Company = escape_html(company)
+            Symbol = text_contents[i*gap+25][0]
+            yield SSI(Company = Company, Symbol = Symbol, Exchange = Exchange )
 
 
 
