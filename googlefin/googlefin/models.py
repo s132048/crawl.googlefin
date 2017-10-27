@@ -22,7 +22,7 @@ class Symbols(DeclarativeBase):
 
     company = Column('company', String, primary_key=True)
     exchange = Column('exchange', String)
-    symbol = Column('symbol', String)
+    symbol = Column('symbol', String, primary_key=True)
 
 
 
