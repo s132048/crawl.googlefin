@@ -57,7 +57,8 @@ class PriceSpider(scrapy.Spider):
                 break
 
         for i in series_contents[startdate:enddate].keys():
-            yield StockPriceItem(Symbol='005930', Date=i, Open=series_contents[i][3], Close=series_contents[i][0],
+            yield StockPriceItem(
+                                 Symbol='005930', Date=i, Open=series_contents[i][3], Close=series_contents[i][0],
                                  High=series_contents[i][1], Low=series_contents[i][2], Volume=series_contents[i][4],
                                  Cdays=series_contents[i][5]
                                  )
