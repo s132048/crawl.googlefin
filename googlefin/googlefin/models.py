@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, Column, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.engine.url import URL
 
-import stocksymbol.settings
+import googlefin.settings
 
 DeclarativeBase =  declarative_base()
 
@@ -22,7 +22,7 @@ class Symbols(DeclarativeBase):
 
     company = Column('company', String, primary_key=True)
     exchange = Column('exchange', String)
-    symbol = Column('symbol', String)
+    symbol = Column('symbol', String, primary_key=True)
 
 
 

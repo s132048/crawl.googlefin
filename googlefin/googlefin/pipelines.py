@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+
 from sqlalchemy.orm import sessionmaker
-from stocksymbol.models import Symbols, db_connect, create_symbols_table
+from googlefin.models import Symbols, db_connect, create_symbols_table
 
 class StocksymbolPipeline(object):
     def process_item(self, item, spider):
