@@ -17,5 +17,3 @@ class StockPriceItem(Item):
     Low = Field()
     Volume = Field()
     Cdays = Field()
-
-
