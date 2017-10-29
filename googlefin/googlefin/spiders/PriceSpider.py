@@ -10,11 +10,19 @@ class PriceSpider(scrapy.Spider):
 
     def start_requests(self):
 
+        symbols = pd.read_csv('../symbols/symbols.csv')
+        if self.code in symbols.Symbol.values:
+            symbols = symbols[symbols.Symbol == self.code]
+        if self.ex in symbols.Exchange.values:
+            symbols = symbols[symbols.Exchange == self.ex]
         S = parse(self.startdate).date()
         duration = datetime.datetime.now().date() - S
         D = duration.days//365 + 1
 
-        yield scrapy.Request('https://finance.google.com/finance/getprices?q=005930&p=%sY&f=d,c,v,k,o,h,l' %D)
+        for i in range(len(symbols)):
+            symbol = symbols.Symbol[i]
+            exchange = symbols.Exchange[i]
+            yield scrapy.Request('https://finance.google.com/finance/getprices?q=%s&x=%s&p=%sY&f=d,c,v,k,o,h,l' %(symbol, exchange, D))
 
     def parse(self, response):
         page = response.text
