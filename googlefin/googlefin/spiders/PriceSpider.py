@@ -10,19 +10,35 @@ class PriceSpider(scrapy.Spider):
 
     def start_requests(self):
 
-        symbols = pd.read_csv('../symbols/symbols.csv')
-        if self.code in symbols.Symbol.values:
-            symbols = symbols[symbols.Symbol == self.code]
-        if self.ex in symbols.Exchange.values:
-            symbols = symbols[symbols.Exchange == self.ex]
+        symbols = pd.read_csv('/Users/TA/Veranos/crawl.googlefin/googlefin/googlefin/symbols/symbols.csv')
+        symbols.index = symbols['Company']
+        del symbols['Company']
+
+        urls = {}
+        url = 'https://finance.google.com/finance/getprices?q=%s&x=%s&p=%sY&f=d,c,v,k,o,h,l'
+
         S = parse(self.startdate).date()
         duration = datetime.datetime.now().date() - S
         D = duration.days//365 + 1
 
-        for i in range(len(symbols)):
-            symbol = symbols.Symbol[i]
-            exchange = symbols.Exchange[i]
-            yield scrapy.Request('https://finance.google.com/finance/getprices?q=%s&x=%s&p=%sY&f=d,c,v,k,o,h,l' %(symbol, exchange, D))
+        if (self.code == 'all') & (self.ex == 'all'):
+            for company, symbol in symbols.iterrows():
+                urls[company] = url %(symbol['Symbol'], symbol['Exchange'], D)
+
+        if (self.code == 'all') & (self.ex != 'all'):
+            symbols = symbols[symbols['Exchange'] == self.ex]
+            for company, symbol in symbols.iterrows():
+                urls[company] = url %(symbol['Symbol'], symbol['Exchange'], D)
+
+        if (self.code != 'all') & (self.ex != 'all'):
+            company = symbols[(symbols['Exchange']==self.ex)&(symbols['Symbol']==self.code)].index[0]
+            urls[company] = url %(self.code, self.ex, D)
+
+        for i in urls:
+            yield scrapy.Request(url=urls[i], callback=self.parse, meta={'company': i})
+
+
+
 
     def parse(self, response):
         page = response.text
@@ -66,7 +82,7 @@ class PriceSpider(scrapy.Spider):
 
         for i in series_contents[startdate:enddate].keys():
             yield StockPriceItem(
-                                 Symbol='005930', Date=i, Open=series_contents[i][3], Close=series_contents[i][0],
+                                 Symbol=response.meta['company'], Date=i, Open=series_contents[i][3], Close=series_contents[i][0],
                                  High=series_contents[i][1], Low=series_contents[i][2], Volume=series_contents[i][4],
                                  Cdays=series_contents[i][5]
                                  )

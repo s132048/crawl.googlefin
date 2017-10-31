@@ -7,29 +7,29 @@ class StocksymbolPipeline(object):
     def process_item(self, item, spider):
         return item
 
-class StockScreenerPipeline(object):
+#class StockScreenerPipeline(object):
 
-    def __init__(self):
+#   def __init__(self):
+#
+#        engine = db_connect()
+#        create_symbols_table(engine)
+#        self.Session = sessionmaker(bind=engine)
 
-        engine = db_connect()
-        create_symbols_table(engine)
-        self.Session = sessionmaker(bind=engine)
-
-    def process_item(self, item, spider):
-
-        session = self.Session()
-        symbol = Symbols(company=item.get('Company'), symbol=item.get('Symbol'), exchange=item.get('Exchange'))
-
-        try:
-            session.add(symbol)
-            session.commit()
-
-        except:
-            session.rollback()
-            raise
-        finally:
-            session.close()
-
-        return item
+#    def process_item(self, item, spider):
+#
+#        session = self.Session()
+#        symbol = Symbols(company=item.get('Company'), symbol=item.get('Symbol'), exchange=item.get('Exchange'))
+#
+#        try:
+#            session.add(symbol)
+#            session.commit()
+#
+#        except:
+#            session.rollback()
+#            raise
+#        finally:
+#            session.close()
+#
+#        return item
 
 
