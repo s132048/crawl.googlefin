@@ -23,9 +23,9 @@ DATABASE = {
     'database': 'symboldb'
 }
 
-ITEM_PIPELINES = {
-    'googlefin.pipelines.StockScreenerPipeline': 300
-}
+#ITEM_PIPELINES = {
+#    'googlefin.pipelines.StockScreenerPipeline': 300
+#}
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'googlefin (+http://www.yourdomain.com)'
 
