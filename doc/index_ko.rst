@@ -34,13 +34,47 @@ PriceSpider는 구글의 get prices 기능을 사용해 주가 데이터를 크�
     f 는 원하는 데이터의 형식으로 d (date), c (close), v (volume), k (cdays), o (open), h (high), l (low) 를 의미합니다.
 
 
-데이터를 얻고자 하는 기간은 scrapy 의 인수로 받습니다. 다음과 같은 커맨드를 사용합니다.
+PriceSpider 는 총 세가지 모드를 지원합니다.
+
+특정 종목 크롤링
+^^^^^^^^^^^^^^^^^^^^^^
+
+크롤링 하고자 하는 종목이 하나일 경우 다음 커맨드를 사용합니다.
 
 .. code-block::
 
-    scrapy crawl getprices -a startdate='startdate' -a enddate='enddate'
+    scrapy crawl getprices -a code='005930' -a ex='KRX' -a startdate='2016-11-01' -a enddate='2017-11-01'
 
-각각의 날짜 인수는 ISO8601 형식만을 지원합니다.
+code 인수는 종목 코드를 받습니다. 종목이 속한 거래소는 ex 인수를 통해 받습니다.
+예시로 사용된 커맨드는 KRX 거래소의 005930 종목을 크롤링합니다.
+symbol 테이블에 거래소와 종목 코드가 모두 일치하는 종목이 없다면 크롤링 되지 않습니다.
+startdate 와 enddate 인수는 크롤링하고자 하는 기간을 지정합니다.
+위 예시는 2016년 11월 1일부터 2017년 11월 1일까지의 기록을 크롤링 합니다.
+날짜는 반드시 ISO 8601 형식으로 입력 되어야 합니다. 기간을 지정하는 인수는 모든 모드에서 동일하게 사용됩니다.
+
+특정 거래소 크롤링
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+특정 거래소의 모든 종목을 크롤링 하고자 한다면 다음 커맨드를 사용합니다.
+
+.. code-block::
+
+    scrapy crawl getprices -a code='all' -a ex='KRX' -a startdate='2016-11-01' -a enddate='2017-11-01'
+
+ex 인수에 원하는 거래소를 입력하고 code 인수에 'all' 을 입력하면 입력된 거래소에 속한 모든 종목의 가격 정보를 크롤링합니다.
+예시로 사용된 커맨드는 KRX 거래소의 모든 종목을 크롤링합니다.
+ex 인수로 사용가능한 거래소는 KRX, KOSDAQ, TYO, SHE, SHA, NYSE, NASDAQ 이 있습니다.
+
+모든 종목 크롤링
+^^^^^^^^^^^^^^^^^^^^^
+
+symbols 테이블에 있는 모든 종목을 크롤링 하고자 한다면 다음 커맨드를 사용합니다.
+
+.. code-block::
+
+    scrapy crawl getprices -a code='all' -a ex='all' -a startdate='2016-11-01' -a enddate='2017-11-01'
+
+위 커맨드를 사용하면 KRX, KOSDAQ, TYO, SHA, SHE, NASDAQ, NYSE 거래소에 속한 모든 종목의 가격 기록을 크롤링합니다.
 
 
 
@@ -65,6 +99,8 @@ PriceSpider는 구글의 get prices 기능을 사용해 주가 데이터를 크�
 
     +------------+------------+
     |   column   |   type     |
+    +------------+------------+
+    |   symbol   |  varchar   |
     +------------+------------+
     |    date    |  varchar   |
     +------------+------------+
