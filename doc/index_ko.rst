@@ -61,7 +61,7 @@ startdate 와 enddate 인수는 크롤링하고자 하는 기간을 지정합니
 
     scrapy crawl getprices -a symbol='all' -a exchange='KRX' -a startdate='2016-11-01' -a enddate='2017-11-01'
 
-exchange 인수에 원하는 거래소를 입력하고 code 인수에 'all' 을 입력하면 입력된 거래소에 속한 모든 종목의 가격 정보를 크롤링합니다.
+exchange 인수에 원하는 거래소를 입력하고 symbol 인수에 'all' 을 입력하면 입력된 거래소에 속한 모든 종목의 가격 정보를 크롤링합니다.
 예시로 사용된 커맨드는 KRX 거래소의 모든 종목을 크롤링합니다.
 exchange 인수로 사용가능한 거래소는 KRX, KOSDAQ, TYO, SHE, SHA, NYSE, NASDAQ 이 있습니다.
 
