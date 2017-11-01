@@ -10,6 +10,7 @@ class StockSymbolItem(Item):
 
 class StockPriceItem(Item):
     Symbol = Field()
+    Exchange = Field()
     Date = Field()
     Open = Field()
     Close = Field()

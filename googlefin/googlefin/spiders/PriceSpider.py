@@ -21,21 +21,21 @@ class PriceSpider(scrapy.Spider):
         duration = datetime.datetime.now().date() - S
         D = duration.days//365 + 1
 
-        if (self.code == 'all') & (self.ex == 'all'):
+        if (self.symbol == 'all') & (self.exchange == 'all'):
             for company, symbol in symbols.iterrows():
-                urls[company] = url %(symbol['Symbol'], symbol['Exchange'], D)
+                urls[company] = [url %(symbol['Symbol'], symbol['Exchange'], D), symbol['Exchange']]
 
-        if (self.code == 'all') & (self.ex != 'all'):
-            symbols = symbols[symbols['Exchange'] == self.ex]
+        if (self.symbol == 'all') & (self.exchange != 'all'):
+            symbols = symbols[symbols['Exchange'] == self.exchange]
             for company, symbol in symbols.iterrows():
-                urls[company] = url %(symbol['Symbol'], symbol['Exchange'], D)
+                urls[company] = [url %(symbol['Symbol'], symbol['Exchange'], D), symbol['Exchange']]
 
-        if (self.code != 'all') & (self.ex != 'all'):
-            company = symbols[(symbols['Exchange']==self.ex)&(symbols['Symbol']==self.code)].index[0]
-            urls[company] = url %(self.code, self.ex, D)
+        if (self.symbol != 'all') & (self.exchange != 'all'):
+            company = symbols[(symbols['Exchange']==self.exchange)&(symbols['Symbol']==self.symbol)].index[0]
+            urls[company] = [url %(self.symbol, self.exchange, D), self.exchange]
 
         for i in urls:
-            yield scrapy.Request(url=urls[i], callback=self.parse, meta={'company': i})
+            yield scrapy.Request(url=urls[i][0], callback=self.parse, meta={'company': i, 'exchange': urls[i][1]})
 
 
 
@@ -82,7 +82,7 @@ class PriceSpider(scrapy.Spider):
 
         for i in series_contents[startdate:enddate].keys():
             yield StockPriceItem(
-                                 Symbol=response.meta['company'],
+                                 Symbol=response.meta['company'], Exchange=response.meta['Exchange'],
                                  Date=i, Open=series_contents[i][3], Close=series_contents[i][0],
                                  High=series_contents[i][1], Low=series_contents[i][2],
                                  Volume=series_contents[i][4], Cdays=series_contents[i][5]
