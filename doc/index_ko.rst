@@ -12,11 +12,23 @@ Spider
 SymbolSpder
 ~~~~~~~~~~~~~~~~~~~
 
-SymbolSpider는 구글 `stock screener <https://finance.google.com/finance?#stockscreener>`_ 에서
-주식의 종목명, 종목 코드, 거래소 데이터를 크롤링합니다. 현재 KOSPI, KOSDAQ, NYSE, NASDAQ, TYO, SHE, SHA 를 지원하고 있습니다.
+SymbolSpider는 구글 `stock screener <https://finance.google.com/finance?#stockscreener>`_ 에서 주식의 종목명, 종목 코드, 거래소 데이터를 크롤링합니다.
+현재 KOSPI(KRX), KOSDAQ, NYSE, NASDAQ, TYO, SHE, SHA 를 지원하고 있습니다.
+
 ``output=json`` 쿼리를 사용해 json 형태의 파일을 받은 후 모든 텍스트 데이터를 text_contents 리스트에 저장합니다.
 먼저 text_contents 로부터 총 종목수를 찾은 후 자료 구조를 파악합니다. 추출된 데이터는 StockSymbolItem 으로 보내집니다.
 보내진 데이터는 파이프라인을 통해 PostgreSQL 데이터베이스에 저장됩니다. 테이블을 생성하고 데이터를 삽입하는데 sqlalchemy가 사용 되었습니다.
+
+다음 코드는 크롤링에 사용된 예시입니다.
+
+.. code-block::
+
+    scrapy crawl stock_symbol -a exchange='SHA,SHE'
+
+exchange 인수로 크롤링하고자 하는 거래소를 지정합니다. 사용 가능한 인수는 KRX, KOSDAQ, NYSE, NASDAQ, SHA, SHE, TYO 입니다.
+거래소명은 공백 없이 ``,`` 로 나누어 입력합니다. 'all' 을 입력하면 지원하는 모든 거래소로부터 크롤링합니다.
+
+
 
 PriceSpider
 ~~~~~~~~~~~~~~~~~~~~
@@ -43,10 +55,11 @@ PriceSpider 는 총 세가지 모드를 지원합니다.
 
 .. code-block::
 
-    scrapy crawl getprices -a symbol='005930' -a exchange='KRX' -a startdate='2016-11-01' -a enddate='2017-11-01'
+    scrapy crawl stock_price -a symbol='005930,035720' -a exchange='KRX' -a startdate='2016-11-01' -a enddate='2017-11-01'
 
 symbol 인수는 종목 코드를 받습니다. 종목이 속한 거래소는 exchange 인수를 통해 받습니다.
-예시로 사용된 커맨드는 KRX 거래소의 005930 종목을 크롤링합니다.
+예시로 사용된 커맨드는 KRX 거래소의 005930 종목과 035720 종목을 크롤링합니다.
+여러 종목의 크롤링을 원한다면 symbol 인수에 ``,`` 로 구분하여 공백없이 입력합니다.
 symbol 테이블에 거래소와 종목 코드가 모두 일치하는 종목이 없다면 크롤링 되지 않습니다.
 startdate 와 enddate 인수는 크롤링하고자 하는 기간을 지정합니다.
 위 예시는 2016년 11월 1일부터 2017년 11월 1일까지의 기록을 크롤링 합니다.
@@ -84,37 +97,37 @@ symbols 테이블에 있는 모든 종목을 크롤링 하고자 한다면 다�
 
 * stocksymbol
 
-    +----------+------------+
-    |  column  |    type    |
-    +----------+------------+
-    | company  |   varchar  |
-    +----------+------------+
-    | symbol   |   varchar  |
-    +----------+------------+
-    | exchange |   varchar  |
-    +----------+------------+
+    +-----------------+------------+
+    |     column      |    type    |
+    +-----------------+------------+
+    |      name       |   varchar  |
+    +-----------------+------------+
+    |     symbol      |   varchar  |
+    +-----------------+------------+
+    | exchange_symbol |   varchar  |
+    +-----------------+------------+
 
 
 * stockprice
 
-    +------------+------------+
-    |   column   |   type     |
-    +------------+------------+
-    |   symbol   |  varchar   |
-    +------------+------------+
-    |  exchange  |  varchar   |
-    +------------+------------+
-    |    date    |  varchar   |
-    +------------+------------+
-    |    open    |   float    |
-    +------------+------------+
-    |   close    |   float    |
-    +------------+------------+
-    |    high    |   float    |
-    +------------+------------+
-    |    low     |   float    |
-    +------------+------------+
-    |   volume   |    int     |
-    +------------+------------+
-    |   cdays    |    int     |
-    +------------+------------+
+    +-----------------+------------+
+    |      column     |   type     |
+    +-----------------+------------+
+    |      symbol     |  varchar   |
+    +-----------------+------------+
+    | exchange_symbol |  varchar   |
+    +-----------------+------------+
+    |       date      |  varchar   |
+    +-----------------+------------+
+    |       open      |   float    |
+    +-----------------+------------+
+    |       close     |   float    |
+    +-----------------+------------+
+    |       high      |   float    |
+    +-----------------+------------+
+    |       low       |   float    |
+    +-----------------+------------+
+    |      volume     |    int     |
+    +-----------------+------------+
+    |      cdays      |    int     |
+    +-----------------+------------+
