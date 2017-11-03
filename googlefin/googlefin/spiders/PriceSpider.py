@@ -31,8 +31,10 @@ class PriceSpider(scrapy.Spider):
                 urls[name] = [url %(symbol['symbol'], symbol['exchange_symbol'], D), symbol['exchange_symbol']]
 
         if (self.symbol != 'all') & (self.exchange != 'all'):
-            name = symbols[(symbols['exchange_symbol']==self.exchange)&(symbols['exchange_symbol']==self.symbol)].index[0]
-            urls[name] = [url %(self.symbol, self.exchange, D), self.exchange]
+            symbol_input = self.symbol.split(sep=',')
+            for symbol in symbol_input:
+                name = symbols[(symbols['exchange_symbol']==self.exchange)&(symbols['symbol']==symbol)].index[0]
+                urls[name] = [url %(symbol, self.exchange, D), self.exchange]
 
         for name in urls:
             yield scrapy.Request(url=urls[name][0], callback=self.parse, meta={'name': name, 'exchange_symbol': urls[name][1]})
