@@ -8,6 +8,10 @@ class StockSymbolItem(Item):
     exchange_symbol = Field()
     name = Field()
 
+class InactiveSymbolItem(Item):
+    symbol = Field()
+    exchange_symbol = Field()
+
 class StockExchangeItem(Item):
     exchange_symbol = Field()
     country = Field()

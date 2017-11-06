@@ -14,14 +14,15 @@ BOT_NAME = 'googlefin'
 SPIDER_MODULES = ['googlefin.spiders']
 NEWSPIDER_MODULE = 'googlefin.spiders'
 
-DATABASE = {
-    'drivename': 'postgres',
-    'host': 'localhost',
-    'port': '5432',
-    'username': 'TA',
-    'password': '2048',
-    'database': 'symboldb'
-}
+
+#DATABASE = {
+#    'drivename': 'postgres',
+#    'host': 'localhost',
+#    'port': '5432',
+#    'username': 'TA',
+#    'password': '2048',
+#    'database': 'symboldb'
+#}
 
 #ITEM_PIPELINES = {
 #    'googlefin.pipelines.StockScreenerPipeline': 300
