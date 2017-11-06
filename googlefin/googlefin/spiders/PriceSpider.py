@@ -7,6 +7,9 @@ from dateutil.parser import parse
 
 class PriceSpider(scrapy.Spider):
     name = 'stock_price'
+    custom_settings = {
+        'DOWNLOAD_DELAY':1.00
+    }
 
     def start_requests(self):
 
@@ -50,13 +53,13 @@ class PriceSpider(scrapy.Spider):
 
         list_contents = []
         series_contents = pd.Series()
-        a = csv.StringIO(page)
-        b = csv.reader(a)
+        page = csv.StringIO(page)
+        page = csv.reader(page)
 
-        for i in b:
+        for line in page:
 
-            if len(i) == 7:
-                list_contents.append(i)
+            if len(line) == 7:
+                list_contents.append(line)
 
         list_contents = list_contents[1:]
 
