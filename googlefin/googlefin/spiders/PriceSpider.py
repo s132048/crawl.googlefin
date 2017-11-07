@@ -6,7 +6,7 @@ from ..items import StockPriceItem
 from dateutil.parser import parse
 
 class PriceSpider(scrapy.Spider):
-    name = 'stock_price'
+    name = 'stock_daily_price'
     custom_settings = {
         'DOWNLOAD_DELAY':1.00
     }
@@ -20,24 +20,24 @@ class PriceSpider(scrapy.Spider):
         urls = {}
         url = 'https://finance.google.com/finance/getprices?q=%s&x=%s&p=%sY&f=d,c,v,k,o,h,l'
 
-        S = parse(self.startdate).date()
-        duration = datetime.datetime.now().date() - S
-        D = duration.days//365 + 1
+        startdate = parse(self.startdate).date()
+        duration = datetime.datetime.now().date() - startdate
+        year = duration.days//365 + 1
 
         if (self.symbol == 'all') & (self.exchange == 'all'):
             for name, symbol in symbols.iterrows():
-                urls[name] = [url %(symbol['symbol'], symbol['exchange_symbol'], D), symbol['exchange_symbol']]
+                urls[name] = [url %(symbol['symbol'], symbol['exchange_symbol'], year), symbol['exchange_symbol']]
 
         if (self.symbol == 'all') & (self.exchange != 'all'):
             symbols = symbols[symbols['exchange_symbol'] == self.exchange]
             for name, symbol in symbols.iterrows():
-                urls[name] = [url %(symbol['symbol'], symbol['exchange_symbol'], D), symbol['exchange_symbol']]
+                urls[name] = [url %(symbol['symbol'], symbol['exchange_symbol'], year), symbol['exchange_symbol']]
 
         if (self.symbol != 'all') & (self.exchange != 'all'):
             symbol_input = self.symbol.split(sep=',')
             for symbol in symbol_input:
                 name = symbols[(symbols['exchange_symbol']==self.exchange)&(symbols['symbol']==symbol)].index[0]
-                urls[name] = [url %(symbol, self.exchange, D), self.exchange]
+                urls[name] = [url %(symbol, self.exchange, year), self.exchange]
 
         for name in urls:
             yield scrapy.Request(url=urls[name][0], callback=self.parse, meta={'name': name, 'exchange_symbol': urls[name][1]})
@@ -47,8 +47,8 @@ class PriceSpider(scrapy.Spider):
 
     def parse(self, response):
         page = response.text
-        S = parse(self.startdate).date()
-        E = parse(self.enddate).date()
+        startdate = parse(self.startdate).date()
+        enddate = parse(self.enddate).date()
 
 
         list_contents = []
@@ -74,13 +74,13 @@ class PriceSpider(scrapy.Spider):
                 series_contents[i[0]] = i[1:]
 
         for i in range(300):
-            datecheck = str(S + datetime.timedelta(i))
+            datecheck = str(startdate + datetime.timedelta(i))
             if datecheck in series_contents.keys():
                 startdate = datecheck
                 break
 
         for i in range(300):
-            datecheck = str(E - datetime.timedelta(i))
+            datecheck = str(enddate - datetime.timedelta(i))
             if datecheck in series_contents.keys():
                 enddate = datecheck
                 break
