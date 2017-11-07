@@ -9,7 +9,7 @@
 Spider
 --------------
 
-SymbolSpder
+SymbolSpider
 ~~~~~~~~~~~~~~~~~~~
 
 SymbolSpider는 구글 `stock screener <https://finance.google.com/finance?#stockscreener>`_ 에서 주식의 종목명, 종목 코드, 거래소 데이터를 크롤링합니다.
