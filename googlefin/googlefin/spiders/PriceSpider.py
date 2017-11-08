@@ -11,6 +11,19 @@ class PriceSpider(scrapy.Spider):
         'DOWNLOAD_DELAY':1.00
     }
 
+    def __init__(self, startdate=None, enddate=None, *args, **kwargs):
+        super.__init__(*args, **kwargs)
+
+        if enddate:
+            self.enddate = parse(enddate).date()
+        else:
+            self.enddata = datetime.datetime.now().date()
+
+        if startdate:
+            self.startdate = parse(startdate).date()
+        else:
+            self.startdate = self.enddate - datetime.timedelta(days=365)
+
     def start_requests(self):
 
         symbols = pd.read_csv('/Users/TA/Veranos/crawl.googlefin/googlefin/googlefin/symbols/symbols.csv')
@@ -47,8 +60,8 @@ class PriceSpider(scrapy.Spider):
 
     def parse(self, response):
         page = response.text
-        startdate = parse(self.startdate).date()
-        enddate = parse(self.enddate).date()
+        startdate = self.startdate
+        enddate = self.enddate
 
 
         list_contents = []
