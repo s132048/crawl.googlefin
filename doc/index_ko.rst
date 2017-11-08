@@ -15,9 +15,10 @@ SymbolSpider
 SymbolSpider는 구글 `stock screener <https://finance.google.com/finance?#stockscreener>`_ 에서 주식의 종목명, 종목 코드, 거래소 데이터를 크롤링합니다.
 현재 KOSPI(KRX), KOSDAQ, NYSE, NASDAQ, TYO, SHE, SHA 를 지원하고 있습니다.
 
-``output=json`` 쿼리를 사용해 json 형태의 파일을 받은 후 모든 텍스트 데이터를 text_contents 리스트에 저장합니다.
-먼저 text_contents 로부터 총 종목수를 찾은 후 자료 구조를 파악합니다. 추출된 데이터는 StockSymbolItem 으로 보내집니다.
-보내진 데이터는 파이프라인을 통해 PostgreSQL 데이터베이스에 저장됩니다. 테이블을 생성하고 데이터를 삽입하는데 sqlalchemy가 사용 되었습니다.
+각각의 거래소 페이지에서 xpath 를 사용해 종목명, 종목코드가 담긴 SelectorList 를 생성합니다.
+selector_contents 객체에 저장된 Selector 들은 inactive 종목을 제거하는 분류를 통해 StockSymbolItem 객체에 저장됩니다.
+inactive 종목들은 상장폐지 된 종목들입니다. StockSymbolItem 객체에 저장된 데이터는 파이프라인을 통해 PostgreSQL 데이터베이스에 저장됩니다.
+테이블을 생성하고 데이터를 삽입하는데 sqlalchemy가 사용 되었습니다.
 
 다음 코드는 크롤링에 사용된 예시입니다.
 
@@ -46,8 +47,6 @@ PriceSpider는 구글의 get prices 기능을 사용해 주가 데이터를 크�
     f 는 원하는 데이터의 형식으로 d (date), c (close), v (volume), k (cdays), o (open), h (high), l (low) 를 의미합니다.
 
 
-PriceSpider 는 총 세가지 모드를 지원합니다.
-
 특정 종목 크롤링
 ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -55,15 +54,12 @@ PriceSpider 는 총 세가지 모드를 지원합니다.
 
 .. code-block::
 
-    scrapy crawl stock_price -a symbol='005930,035720' -a exchange='KRX' -a startdate='2016-11-01' -a enddate='2017-11-01'
+    scrapy crawl stock_daily_price -a symbol='005930,035720' -a exchange='KRX'
 
 symbol 인수는 종목 코드를 받습니다. 종목이 속한 거래소는 exchange 인수를 통해 받습니다.
 예시로 사용된 커맨드는 KRX 거래소의 005930 종목과 035720 종목을 크롤링합니다.
 여러 종목의 크롤링을 원한다면 symbol 인수에 ``,`` 로 구분하여 공백없이 입력합니다.
 symbol 테이블에 거래소와 종목 코드가 모두 일치하는 종목이 없다면 크롤링 되지 않습니다.
-startdate 와 enddate 인수는 크롤링하고자 하는 기간을 지정합니다.
-위 예시는 2016년 11월 1일부터 2017년 11월 1일까지의 기록을 크롤링 합니다.
-날짜는 반드시 ISO 8601 형식으로 입력 되어야 합니다. 기간을 지정하는 인수는 모든 모드에서 동일하게 사용됩니다.
 
 특정 거래소 크롤링
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -72,7 +68,7 @@ startdate 와 enddate 인수는 크롤링하고자 하는 기간을 지정합니
 
 .. code-block::
 
-    scrapy crawl stock_price -a symbol='all' -a exchange='KRX' -a startdate='2016-11-01' -a enddate='2017-11-01'
+    scrapy crawl stock_daily_price -a symbol='all' -a exchange='KRX'
 
 exchange 인수에 원하는 거래소를 입력하고 symbol 인수에 'all' 을 입력하면 입력된 거래소에 속한 모든 종목의 가격 정보를 크롤링합니다.
 예시로 사용된 커맨드는 KRX 거래소의 모든 종목을 크롤링합니다.
@@ -85,23 +81,45 @@ symbols 테이블에 있는 모든 종목을 크롤링 하고자 한다면 다�
 
 .. code-block::
 
-    scrapy crawl stock_price -a symbol='all' -a exchange='all' -a startdate='2016-11-01' -a enddate='2017-11-01'
+    scrapy crawl stock_daily_price -a symbol='all' -a exchange='all'
 
 위 커맨드를 사용하면 KRX, KOSDAQ, TYO, SHA, SHE, NASDAQ, NYSE 거래소에 속한 모든 종목의 가격 기록을 크롤링합니다.
 
+크롤링 기간 지정
+^^^^^^^^^^^^^^^^^^^^^^^
 
+stock_daily_price 스파이더는 크롤링 기간을 지정할 수 있습니다. 기간은 startdate, enddate 두 인수를 통해 받습니다.
+startdate 는 크롤링을 시작하는 날짜, enddate 는 크롤링을 종료하는 날짜로 ISO8601 형식으로 입력합니다.
 
-InactiveSpider
-~~~~~~~~~~~~~~~~~~~~
+크롤링 기간을 지정하지 않은 경우
+++++++++++++++++++++++++++++++++++++
 
-`google finance stock screener <https://finance.google.com/finance?#stockscreener>`_ 에서 Inactive 로 표시된 종목들을 크롤링 합니다.
-Inactive 종목은 현재 상장폐지 된 종목입니다. `SymbolSpider`_ 와는 다른 url 을 사용해 크롤링합니다. 다음 커맨드는 실제 크롤링에 사용된 예시입니다.
+아래 커맨드와 같이 크롤링 기간을 지정하지 않으면 디폴트 기간의 가격 정보를 크롤링합니다. 디폴트는 크롤링을 실행하는 날짜로부터 일년전까지 입니다.
 
 .. code-block::
 
-    scrapy crawl inactive_symbol -a exchange='SHA,SHE'
+    scrapy crawl stock_daily_price -a symbol='all' -a exchange='all'
 
-위 커맨드는 SHA, SHE 거래소의 상장폐지 된 종목들을 크롤링합니다. exchange 인수는 SymbolSpider 와 동일하게 사용합니다.
+startdate 만 지정한 경우
+++++++++++++++++++++++++++++++++++
+
+아래 커맨드와 같이 startdate 만 지정하면 startdate 인 2016년 7월 11일부터 크롤링을 실행한 날짜까지의 가격 정보를 크롤링합니다.
+
+.. code-block::
+
+    scrapy crawl stock_daily_price -a symbol='all' -a exchange='all' -a startdate='2016-07-11'
+
+startdate 와 enddate 모두 지정한 경우
++++++++++++++++++++++++++++++++++++++
+
+startdate 와 enddate 를 모두 지정하면 지정된 기간 동안의 가격 정보를 크롤링합니다. 다음 커맨드는 2016년 7월 11일부터 2017년 8월 14일까지의 가격 정보를 크롤링합니다.
+
+.. code-block::
+
+    scrapy crawl stock_daily_price -a symbol='all' -a exchange='all' -a startdate='2016-07-11' -a enddate='2017-08-14'
+
+
+
 
 테이블
 --------
@@ -143,12 +161,3 @@ Inactive 종목은 현재 상장폐지 된 종목입니다. `SymbolSpider`_ 와�
     |      cdays      |    int     |
     +-----------------+------------+
 
-*inactivesymbol
-
-    +-----------------+------------+
-    |     column      |    type    |
-    +-----------------+------------+
-    |     symbol      |   varchar  |
-    +-----------------+------------+
-    | exchange_symbol |   varchar  |
-    +-----------------+------------+
