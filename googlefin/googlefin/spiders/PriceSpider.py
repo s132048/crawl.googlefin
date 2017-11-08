@@ -4,6 +4,7 @@ import datetime
 import pandas as pd
 from ..items import StockPriceItem
 from dateutil.parser import parse
+import os
 
 class PriceSpider(scrapy.Spider):
     name = 'stock_daily_price'
@@ -12,12 +13,12 @@ class PriceSpider(scrapy.Spider):
     }
 
     def __init__(self, startdate=None, enddate=None, *args, **kwargs):
-        super.__init__(*args, **kwargs)
+        super(PriceSpider, self).__init__(*args, **kwargs)
 
         if enddate:
             self.enddate = parse(enddate).date()
         else:
-            self.enddata = datetime.datetime.now().date()
+            self.enddate = datetime.datetime.now().date()
 
         if startdate:
             self.startdate = parse(startdate).date()
@@ -26,14 +27,15 @@ class PriceSpider(scrapy.Spider):
 
     def start_requests(self):
 
-        symbols = pd.read_csv('/Users/TA/Veranos/crawl.googlefin/googlefin/googlefin/symbols/symbols.csv')
+        curdir = os.path.dirname(os.path.abspath(__file__))
+        symbols = pd.read_csv(os.path.join(curdir,'symbols.csv'))
         symbols.index = symbols['name']
         del symbols['name']
 
         urls = {}
         url = 'https://finance.google.com/finance/getprices?q=%s&x=%s&p=%sY&f=d,c,v,k,o,h,l'
 
-        startdate = parse(self.startdate).date()
+        startdate = self.startdate
         duration = datetime.datetime.now().date() - startdate
         year = duration.days//365 + 1
 
