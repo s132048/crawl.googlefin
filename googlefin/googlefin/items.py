@@ -8,17 +8,13 @@ class StockSymbolItem(Item):
     exchange_symbol = Field()
     name = Field()
 
-class InactiveSymbolItem(Item):
-    symbol = Field()
-    exchange_symbol = Field()
-
 class StockExchangeItem(Item):
     exchange_symbol = Field()
     country = Field()
     name = Field()
 
-class StockPriceItem(Item):
-    name = Field()
+class StockDailyPriceItem(Item):
+    symbol = Field()
     exchange_symbol = Field()
     date = Field()
     open = Field()
