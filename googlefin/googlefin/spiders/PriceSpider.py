@@ -80,10 +80,15 @@ class PriceSpider(scrapy.Spider):
             if len(line) == 6:
                 list_contents.append(line)
 
-        list_contents = list_contents[1:]
+        for i in range(10):
+            if list_contents[i][0][0] == 'a':
+                startpoint = i
+                break
+
+        list_contents = list_contents[startpoint:]
 
         for i in list_contents:
-            if len(i[0]) > 4:
+            if i[0][0] == 'a':
                 stamp = int(i[0][1:])
                 date = datetime.datetime.fromtimestamp(stamp).date()
                 i[0] = str(date)
