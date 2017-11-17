@@ -70,55 +70,56 @@ class PriceSpider(scrapy.Spider):
         startindex = None
         endindex = None
 
+        if page[-2] != '=':
 
-        list_contents = []
-        series_contents = pd.Series()
-        page = csv.StringIO(page)
-        page = csv.reader(page)
+            list_contents = []
+            series_contents = pd.Series()
+            page = csv.StringIO(page)
+            page = csv.reader(page)
+            
+            for line in page:
+                if len(line) == 6:
+                    list_contents.append(line)
 
-        for line in page:
-            if len(line) == 6:
-                list_contents.append(line)
+            for i in range(10):
+                if list_contents[i][0][0] == 'a':
+                    startpoint = i
+                    break
 
-        for i in range(10):
-            if list_contents[i][0][0] == 'a':
-                startpoint = i
-                break
+            list_contents = list_contents[startpoint:]
 
-        list_contents = list_contents[startpoint:]
+            for i in list_contents:
+                if i[0][0] == 'a':
+                    stamp = int(i[0][1:])
+                    date = datetime.datetime.fromtimestamp(stamp).date()
+                    i[0] = str(date)
+                    series_contents[i[0]] = i[1:]
+                else:
+                    i[0] = str(date + datetime.timedelta(int(i[0])))
+                    series_contents[i[0]] = i[1:]
 
-        for i in list_contents:
-            if i[0][0] == 'a':
-                stamp = int(i[0][1:])
-                date = datetime.datetime.fromtimestamp(stamp).date()
-                i[0] = str(date)
-                series_contents[i[0]] = i[1:]
-            else:
-                i[0] = str(date + datetime.timedelta(int(i[0])))
-                series_contents[i[0]] = i[1:]
+            for i in range(300):
+                datecheck = str(startdate + datetime.timedelta(i))
+                if datecheck in series_contents.keys():
+                    startindex = datecheck
+                    break
 
-        for i in range(300):
-            datecheck = str(startdate + datetime.timedelta(i))
-            if datecheck in series_contents.keys():
-                startindex = datecheck
-                break
+            for i in range(300):
+                datecheck = str(enddate - datetime.timedelta(i))
+                if datecheck in series_contents.keys():
+                    endindex = datecheck
+                    break
 
-        for i in range(300):
-            datecheck = str(enddate - datetime.timedelta(i))
-            if datecheck in series_contents.keys():
-                endindex = datecheck
-                break
-
-        if (startindex != None) and (endindex != None):
-            for i in series_contents[startindex:endindex].keys():
-                yield StockDailyPriceItem(
-                                     symbol=response.meta['symbol'],
-                                     exchange_symbol=response.meta['exchange_symbol'],
-                                     date=i,
-                                     open=series_contents[i][3],
-                                     close=series_contents[i][0],
-                                     high=series_contents[i][1],
-                                     low=series_contents[i][2],
-                                     volume=series_contents[i][4],
-                )
+            if (startindex != None) and (endindex != None):
+                for i in series_contents[startindex:endindex].keys():
+                    yield StockDailyPriceItem(
+                                         symbol=response.meta['symbol'],
+                                         exchange_symbol=response.meta['exchange_symbol'],
+                                         date=i,
+                                         open=series_contents[i][3],
+                                         close=series_contents[i][0],
+                                         high=series_contents[i][1],
+                                         low=series_contents[i][2],
+                                         volume=series_contents[i][4],
+                    )
 
