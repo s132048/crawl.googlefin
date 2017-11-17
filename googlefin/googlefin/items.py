@@ -22,4 +22,3 @@ class StockDailyPriceItem(Item):
     high = Field()
     low = Field()
     volume = Field()
-    cdays = Field()
